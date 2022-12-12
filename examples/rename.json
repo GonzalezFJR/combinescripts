@@ -1,0 +1,16 @@
+{
+  "JES" : "Jet energy scale",
+  "WJets" : "W+jets",
+  "tW" : "tW",
+  "Lumi" : "Luminosity",
+  "btagSF" : "b-tagging",
+  "trigSF" : "Trigger SF",
+  "Prefire" : "L1 prefiring",
+  "PDF" : "PDF",
+  "Scales" : "#mu_R and #mu_F scales",
+  "ISR" : "ISR",
+  "FSR" : "FSR",
+  "UE" : "Underlying event tune",
+  "lepSF" : "Lepton efficiencies",
+  "hdamp" : "h_damp"
+}
