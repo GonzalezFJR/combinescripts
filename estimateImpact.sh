@@ -26,16 +26,17 @@ DATACARD="${DATACARD}.root"
 echo "First Stage: fit for each POI"
 echo "-----------------------------"
 
-combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --doInitialFit --robustHesse 1 --cminDefaultMinimizerStrategy 0 --rMin -30
-#combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --doInitialFit --robustFit 1 --rMin -10
+#combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --doInitialFit --robustHesse 1 --cminDefaultMinimizerStrategy 0 --rMin -30
+combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --doInitialFit --robustFit 1 --rMin -10 --parallel 4
 #combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --doInitialFit --robustHesse 1 --rMin -10
 
 
 echo "Second Stage: fit scan for each nuisance parameter"
 echo "--------------------------------------------------"
 
-#combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --robustFit 1 --doFits --parallel 7 --rMin -10
-combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --robustHesse 1 --cminDefaultMinimizerStrategy 0 --doFits --rMin -30 --parallel 6
+combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --robustFit 1 --doFits --parallel 4 --rMin -10
+#combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --robustHesse 1 --cminDefaultMinimizerStrategy 0 --doFits --rMin -30
+#~ --parallel 6
 #combineTool.py -M Impacts -d ${DATACARD} -m ${MASS} --robustHesse 1 --doFits --parallel 7 --rMin -10
 
 echo "Third Stage: collect outputs"

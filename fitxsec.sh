@@ -23,9 +23,9 @@ mv scan.png fullUncertaintyScan.png
 # Uncertainty breakdown
 echo "UNCERTAINTY BREAKDOWN"
 
-combine -M MultiDimFit -t -1 --expectSignal 1 --algo none --rMin 0.1 --rMax 2.0 ${CARD} ${POIS} -n Bestfit --saveWorkspace
-combine -M MultiDimFit -t -1 --expectSignal 1 --algo grid --points ${SCAN} --rMin 0.1 --rMax 2.0 -n Systs higgsCombineBestfit.MultiDimFit.mH120.root --snapshotName MultiDimFit --freezeParameters "tt,DY,Nonprompt,tW,VV,MuonEff,ElecEff,TrigEff,JES,JER,Prefire,PU,PDF,Scale,ISR,FSR,hdamp,UE,autoMCStats" ${POIS}
-#combine -M MultiDimFit --algo none --rMin 0.1 --rMax 2.0 ${CARD} ${POIS} -n Bestfit --saveWorkspace
-#combine -M MultiDimFit --algo grid --points ${SCAN} --rMin 0.1 --rMax 2.0 -n Systs higgsCombineBestfit.MultiDimFit.mH120.root --snapshotName MultiDimFit --freezeParameters "tt,DY,Nonprompt,tW,VV,MuonEff,ElecEff,TrigEff,JES,JER,Prefire,PU,PDF,Scale,ISR,FSR,hdamp,UE,autoMCStats" ${POIS}
+#combine -M MultiDimFit -t -1 --expectSignal 1 --algo none --rMin 0.1 --rMax 2.0 ${CARD} ${POIS} -n Bestfit --saveWorkspace
+#combine -M MultiDimFit -t -1 --expectSignal 1 --algo grid --points ${SCAN} --rMin 0.1 --rMax 2.0 -n Systs higgsCombineBestfit.MultiDimFit.mH120.root --snapshotName MultiDimFit --freezeParameters "tt,DY,Nonprompt,tW,VV,MuonEff,ElecEff,TrigEff,JES,JER,Prefire,PU,PDF,Scale,ISR,FSR,hdamp,UE,autoMCStats" ${POIS}
+combine -M MultiDimFit --algo none --rMin 0.1 --rMax 2.0 ${CARD} ${POIS} -n Bestfit --saveWorkspace
+combine -M MultiDimFit --algo grid --points ${SCAN} --rMin 0.1 --rMax 2.0 -n Systs higgsCombineBestfit.MultiDimFit.mH120.root --snapshotName MultiDimFit --freezeParameters "Lumi,tW,WJets,QCD,DY,lepSF,btagSF,FSR,ISR,JES,prefire,PDF,Scales,trigSF,hdamp,UE,autoMCStats" ${POIS}
 
-plot1DScan.py higgsCombineNominal.MultiDimFit.mH120.root --others  'higgsCombineSysts.MultiDimFit.mH120.root:Freeze all:31' --breakdown syst,stat
+plot1DScan.py higgsCombineNominal.MultiDimFit.mH120.root --others  'higgsCombineSysts.MultiDimFit.mH120.root:Stat only:31' --breakdown syst,stat

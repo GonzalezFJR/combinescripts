@@ -112,6 +112,32 @@ class DatacardModifier:
       uncertainties.append(unc)
     return uncertainties
 
+  def GetUncProcessDic(self):
+    fromThisLine = False
+    uncDic = {}
+    processes = self.GetProcessesInCard()
+    for i in range(len(self.lines)):
+      if self.lines[i].startswith('rate ') and not fromThisLine: 
+        fromThisLine = True
+        continue
+      if not fromThisLine: continue
+      if 'autoMCStats' in self.lines[i]: continue
+      if self.lines[i].startswith('-') or self.lines[i].startswith('#'): continue
+      if self.lines[i].replace(' ', '') == '': continue
+      unc = self.lines[i].split(' ')[0]
+      line = self.lines[i]
+      while ('  ' in line): line = line.replace('  ', ' ')
+      shape = line.split(' ')[1]
+      if shape != 'shape': continue
+      val = line.replace('\n', '').split(' ')[2:]
+      pr = []
+      for i in range(len(val)):
+        if val[i] == '1': pr.append(processes[i])
+      uncDic[unc] = pr
+    return uncDic
+
+
+
   def GetProcessesMask(self, processes):
     allpr = self.GetProcessesInCard()
     if not isinstance(processes, list) and ',' in processes: processes = processes.replace(' ', '').split(',')
