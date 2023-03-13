@@ -1,6 +1,10 @@
 import json
+
 jsonfile = 'impacts.json'
-outfile = 'impacts_nostat.json'
+import sys
+if sys.argv[-1].endswith('.json'): jsonfile = sys.argv[-1]
+outfile = jsonfile[:-5] + '_nstat.json'
+
 
 with open(jsonfile, 'r') as f:
   d = json.load(f)

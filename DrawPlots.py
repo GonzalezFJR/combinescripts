@@ -19,6 +19,11 @@ def Stack(path, mode, processes, colors, names={}, xtit='', ytit='Events', doBli
   if not os.path.exists(pathorig + origrootfile):
     print("Original root file not found: " + pathorig + "/" + origrootfile)
     print("We need it to the the original binning and labels!")
+    trynew = pathorig+origrootfile.replace("_l_", "_e_")
+    if os.path.exists(trynew):
+      print("Found it for e channel: " + trynew)
+      forig = r.TFile.Open(trynew, "READ")
+      hOrig = forig.Get("data_obs")
   else:
     forig = r.TFile.Open(pathorig + origrootfile, "READ")
     hOrig = forig.Get("data_obs")
@@ -37,18 +42,24 @@ def Stack(path, mode, processes, colors, names={}, xtit='', ytit='Events', doBli
     colors = {p:c for p,c in zip(processes, colors)}
 
   f = r.TFile.Open(path, "READ")
+  print('Opening file: ' + path)
   subdir = f.Get(dirname)
   # list dirs and get the first one
   dirs = list(subdir.GetListOfKeys())
-  if len(dirs) == 1:
-    subdir = subdir.Get(dirs[0].GetName())
+  #if len(dirs) == 1:
+  subdir = subdir.Get(dirs[0].GetName())
+  # else... XXX
 
   hstack = r.THStack("stack", "stack")
   for p in reversed(processes):
+    print('opening process: ', p)
     h = subdir.Get(p)
-    h.SetLineWidth(0)
-    h.SetFillColor(colors[p])
-    hstack.Add(h)
+    if not hasattr(h, 'SetLineWidth'):
+      print('Histo for process ', p, ' not found!! Probably it is empty...') 
+    else:
+      h.SetLineWidth(0)
+      h.SetFillColor(colors[p])
+      hstack.Add(h)
 
   hdata = subdir.Get("data") if not doBlind else hstack.GetStack().Last().Clone("Asimov")
   htot = subdir.Get("total") # For uncertainty band

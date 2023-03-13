@@ -1,14 +1,17 @@
 # Execute this one the datacards are ready!! That is: neg weights are fixed and datacards redone.
-path = 'tt5TeVljets/02dec2022/'
-outpath = 'tt5TeVljets/02dec2022/combine/'
-webpath = '/nfs/fanae/user/juanr/www/public/tt5TeV/ljets/15dec2022/'
+dirname = '02mar23_JESsplit' # '10jan2023_newMVA15var'
+path = 'tt5TeVljets/'+dirname+'/' 
+outpath = 'tt5TeVljets/' + dirname + '/plots/'
+webpath = '/nfs/fanae/user/juanr/www/public/tt5TeV/ljets/' + dirname + '/combine/'
 doComb = True
-doEach = True
+doComb2l = False
+doEach = False
 scans = True
 impacts = False
-impactsAsimov = False
+impactsAsimov = True
 fitdiag = False
 plotSyst = False
+doMergeLeps = False
 
 import os,sys, argparse
 
@@ -46,6 +49,24 @@ ImpactsAsimov = lambda card : 'sh estimateImpact_Asimov_signal1.sh ' + card[:-4]
 FitDiag = lambda card : 'combine -M FitDiagnostics %s --saveShapes --saveWithUncertainties -n "Histos" -m 0 --expectSignal 1' % card
 PlotSyst = lambda card, outpath, chan : 'python modules/PlotSyst.py %s -o %s -c %s' % (card, outpath, chan)
 
+def RmStatFromImpactsJson(jsonname):
+  command = 'python rmStatUncFromImpJson.py %s' % (jsonname)
+  out = jsonname[:-5] + '_nostat.json'
+  return out
+
+def GetGoodImpacts(jsonname, asimovjsonname=None, outname=None):
+  jsnoname = RmStatFromImpactsJson(jsonname)
+  if asimovjsonname is not None:
+    asimovjsonname = RmStatFromImpactsJson(asimovjsonname)
+  else:
+    asimovjsonname = jsonname
+  if outname is None:
+    outname = jsonname[:-5] + '_custom'
+  command = "python customImpacts.py -i %s --asimov-input %s --per-page 15 --onlyfirstpage -o %s -t rename.json"%(jsonname, asimovjsonname, outname)
+  return outname
+
+
+
 ### Check paths
 if not path.endswith('/'): path += '/'
 outpath = CheckDir(outpath)
@@ -57,9 +78,19 @@ os.chdir(current_dir)
 
 ### Get the datacards
 datanames = []
+datanamesem = []
 for f in os.listdir(path):
-    if f.endswith('.txt') and f.startswith('dat_'):
-        datanames.append(path+f)
+    if f.endswith('.txt') and f.startswith('dat_') :
+      if doMergeLeps:
+        if '_l_' in f:
+          datanames.append(path+f)
+        else:
+          datanamesem.append(path+f)
+      else:
+        if '_l_' in f:
+          continue
+        else:
+         datanames.append(path+f)
 
 if scans and doEach:
   os.system('rm data.csv')
@@ -126,7 +157,7 @@ if doComb:
 
   datanames = []
   for f in os.listdir(path):
-    if f.endswith('.txt') and f.startswith('dat_'):
+    if f.endswith('.txt') and f.startswith('dat_') and not '_l_' in f:
         datanames.append(f)
   combcardName = 'datacard_comb.txt'
   command = 'combineCards.py ' + ' '.join(datanames) + ' > ' + combcardName
@@ -167,6 +198,58 @@ if doComb:
     woutpath = CheckDir(webpath + 'impacts/')
     os.rename('impacts.pdf', '%s%s_impactsAsimov.pdf' % (woutpath, chan))
 
+# Comb with 2l
+if doComb2l:
+  datanames = []
+  dilepCardName = 'datacard_counts_em_g2jets.txt'
+  chan = 'combWithDilep'
+  for f in os.listdir(path):
+    if f.endswith('.txt') and f.startswith('dat_') and not '_l_' in f:
+        datanames.append(f)
+  if not os.path.isfile(path + '/' + dilepCardName):
+    print('ERROR: datacard: %s does not exist'%dilepCardName)
+    exit()
+  combcardName = 'datacard_comb_withDilep.txt'
+  command = 'combineCards.py ' + ' '.join(datanames) + ' ' + dilepCardName + ' > ' + combcardName
+  os.chdir(path)
+  run(command, pretend)
+  card = path+combcardName
+  os.chdir(current_dir)
+
+  # Scans
+  if scans:
+    command = Fit(card)
+    run(command, pretend)
+    woutpath = CheckDir(webpath + 'scans/')
+    for form in {'pdf', 'png'}:
+      os.rename('scan.%s' % form, '%s%s_scan.%s' % (woutpath, chan, form))
+
+    # Asimov fit
+    command = FitAsimov(card)
+    run(command, pretend)
+    woutpath = CheckDir(webpath + 'scans/')
+    for form in {'pdf', 'png'}:
+      os.rename('scan.%s' % form, '%s%s_scan_asimov.%s' % (woutpath, chan, form))
+
+  # Impacts
+  if impacts:
+    command = Impacts(card)
+    run(command, pretend)
+    woutpath = CheckDir(webpath + 'impacts/')
+    os.rename('impacts.pdf', '%s%s_impacts.pdf' % (woutpath, chan))
+    os.rename('impacts.json', '%s_impacts.json' % (chan))
+    jsonName = '%s_impacts.json' % (chan)
+
+
+  # Impacts Asimov
+  if impactsAsimov:
+    command = ImpactsAsimov(card)
+    run(command, pretend)
+    woutpath = CheckDir(webpath + 'impacts/')
+    os.rename('impacts.pdf', '%s%s_impactsAsimov.pdf' % (woutpath, chan))
+    jsonAsimName = '%s_impactsAsimov.json' % (chan)
+    os.rename('impacts.json', jsonAsimName)
+    customname = GetGoodImpacts(jsonAsimName)
 
 # Draw Table
 if scans:

@@ -26,7 +26,7 @@ Or for Asimov
 Edit the file to change the estimate signal mu, for example.
 To remove the stat unc from impacts, use:
 
-    rmStatUncFromImpJson.py
+    python rmStatUncFromImpJson.py # by default, impacts.json is taken
 
 And plot again the impacts with
 
@@ -34,7 +34,7 @@ And plot again the impacts with
 
 Or custom inputs with:
 
-    python customImpacts -i impacts.json --asimov-input impacts_asimov.json --per-page 10 --onlyfirstpage -o impacts_custom -t rename.json
+    python customImpacts.py -i impacts.json --asimov-input impacts_asimov.json --per-page 10 --onlyfirstpage -o impacts_custom -t rename.json
 
 where 'rename.json' is a json dict with rename options for nuisances.
 
